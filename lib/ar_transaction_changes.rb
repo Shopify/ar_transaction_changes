@@ -18,17 +18,28 @@ module ArTransactionChanges
     @transaction_changed_attributes ||= HashWithIndifferentAccess.new
   end
 
-  method_name = if ActiveRecord.gem_version >= Gem::Version.new("5.2.0.beta1")
-    "_write_attribute"
-  else
-    "write_attribute"
+  def _write_attribute(attr_name, value)
+    _store_transaction_changed_attributes(attr_name) do
+      super(attr_name, value)
+    end
   end
 
-  define_method(method_name) do |attr_name, value|
+  if ActiveRecord.version >= Gem::Version.new('6.1.0.alpha')
+    def write_attribute(attr_name, value)
+      _store_transaction_changed_attributes(attr_name) do
+        super(attr_name, value)
+      end
+    end
+  end
+
+  private
+
+  def _store_transaction_changed_attributes(attr_name)
     attr_name = attr_name.to_s
     old_value = read_attribute(attr_name)
-    ret = super(attr_name, value)
-    unless transaction_changed_attributes.key?(attr_name) || value == old_value
+    ret = yield
+    new_value = read_attribute(attr_name)
+    unless transaction_changed_attributes.key?(attr_name) || new_value == old_value
       transaction_changed_attributes[attr_name] = old_value
     end
     ret
