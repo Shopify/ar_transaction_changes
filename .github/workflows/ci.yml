@@ -20,6 +20,7 @@ jobs:
             rails: '7.0'
 
     name: Ruby ${{ matrix.ruby }} / Rails ${{ matrix.rails }}
+    continue-on-error: ${{ matrix.rails == 'head' }}
 
     env:
       BUNDLE_GEMFILE: gemfiles/rails_${{ matrix.rails }}.gemfile
