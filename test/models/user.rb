@@ -9,8 +9,8 @@ class User < ActiveRecord::Base
     end
   end
 
-  serialize :connection_details, Array
-  serialize :notes, Array
+  serialize :connection_details, type: Array
+  serialize :notes, type: Array
 
   attr_accessor :stored_transaction_changes
 
