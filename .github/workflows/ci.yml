@@ -6,24 +6,51 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         ruby: ['3.2', '3.3', '3.4']
-        rails: ['7.0', '7.1', '7.2', '8.0', 'head']
+        rails: ['7.0', '7.1', '7.2', '8.0']
         exclude:
           # Rails 7.0 requires Ruby < 3.4
           - ruby: '3.4'
             rails: '7.0'
 
     name: Ruby ${{ matrix.ruby }} / Rails ${{ matrix.rails }}
-    continue-on-error: ${{ matrix.rails == 'head' }}
 
     env:
       BUNDLE_GEMFILE: gemfiles/rails_${{ matrix.rails }}.gemfile
+
+    steps:
+    - name: Install required packages
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install libsqlite3-dev
+    - uses: actions/checkout@v3
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+    - name: Run tests
+      run: bundle exec rake
+
+  test-head:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['3.2', '3.3', '3.4']
+
+    name: Ruby ${{ matrix.ruby }} / Rails head
+
+    env:
+      BUNDLE_GEMFILE: gemfiles/rails_head.gemfile
 
     steps:
     - name: Install required packages
