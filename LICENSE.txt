@@ -1,4 +1,4 @@
-Copyright (c) 2012 Shopify Inc.
+Copyright (c) 2012-today Shopify Inc.
 
 MIT License
 
