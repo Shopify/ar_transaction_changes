@@ -13,12 +13,14 @@ Gem::Specification.new do |gem|
   gem.homepage      = "https://github.com/Shopify/ar_transaction_changes"
   gem.license       = "MIT"
 
+  gem.required_ruby_version = ">= 3.2"
+
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_dependency "activerecord", ">= 5.2.0"
+  gem.add_dependency "activerecord", ">= 7.0.0"
 
   gem.add_development_dependency("rake")
 end
