@@ -65,3 +65,24 @@ jobs:
         bundler-cache: true
     - name: Run tests
       run: bundle exec rake
+
+  ci-summary:
+    runs-on: ubuntu-latest
+    needs: [test, test-head]
+    if: always()
+
+    name: CI Summary
+
+    steps:
+    - name: Check test results
+      run: |
+        if [ "${{ needs.test.result }}" != "success" ]; then
+          echo "❌ Required tests failed"
+          exit 1
+        fi
+        echo "✅ All required tests passed"
+        if [ "${{ needs.test-head.result }}" != "success" ]; then
+          echo "⚠️  Rails head tests failed (non-blocking)"
+        else
+          echo "✅ Rails head tests passed"
+        fi
