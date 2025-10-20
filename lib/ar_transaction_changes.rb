@@ -4,6 +4,12 @@ require "ar_transaction_changes/version"
 require "active_record"
 
 module ArTransactionChanges
+  def self.included(base)
+    if !base._commit_callbacks.empty? || !base._rollback_callbacks.empty?
+      raise "ArTransactionChanges must be included before defining any after_commit or after_rollback callbacks"
+    end
+  end
+
   if ActiveRecord.version >= Gem::Version.new('8.1.0.alpha')
     def _run_commit_callbacks!
       super
