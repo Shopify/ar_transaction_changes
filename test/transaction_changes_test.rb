@@ -174,4 +174,28 @@ class TransactionChangesTest < Minitest::Test
 
     assert_equal [[], ['a', 'b']], @user.stored_transaction_changes['notes']
   end
+
+  def test_do_not_allow_adding_this_gem_to_a_model_after_commit_callbacks_are_defined
+    assert_raises(RuntimeError) do
+      Class.new(ActiveRecord::Base) do
+        after_commit :some_method
+
+        include ArTransactionChanges
+
+        def some_method; end
+      end
+    end
+  end
+
+    def test_do_not_allow_adding_this_gem_to_a_model_after_rollback_callbacks_are_defined
+    assert_raises(RuntimeError) do
+      Class.new(ActiveRecord::Base) do
+        after_rollback :some_method
+
+        include ArTransactionChanges
+
+        def some_method; end
+      end
+    end
+  end
 end
