@@ -9,8 +9,13 @@ class User < ActiveRecord::Base
     end
   end
 
-  serialize :connection_details, Array
-  serialize :notes, Array
+  if ActiveRecord.gem_version >= Gem::Version.new('7.1.0')
+    serialize :connection_details, type: Array
+    serialize :notes, type: Array
+  else
+    serialize :connection_details, Array
+    serialize :notes, Array
+  end
 
   attr_accessor :stored_transaction_changes
 
