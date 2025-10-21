@@ -5,8 +5,10 @@ require "active_record"
 
 module ArTransactionChanges
   def self.included(base)
-    if !base._commit_callbacks.empty? || !base._rollback_callbacks.empty?
-      raise "ArTransactionChanges must be included before defining any after_commit or after_rollback callbacks"
+    if base.respond_to?(:_commit_callbacks) && base.respond_to?(:_rollback_callbacks)
+      if !base._commit_callbacks.empty? || !base._rollback_callbacks.empty?
+        raise "ArTransactionChanges must be included before defining any after_commit or after_rollback callbacks"
+      end
     end
   end
 
