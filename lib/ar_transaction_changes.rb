@@ -4,37 +4,21 @@ require "ar_transaction_changes/version"
 require "active_record"
 
 module ArTransactionChanges
-  def self.included(base)
-    if base.respond_to?(:_commit_callbacks) && base.respond_to?(:_rollback_callbacks)
-      if !base._commit_callbacks.empty? || !base._rollback_callbacks.empty?
-        raise "ArTransactionChanges must be included before defining any after_commit or after_rollback callbacks"
+  if ActiveRecord.version >= Gem::Version.new('7.1')
+    def run_callbacks(kind, type = nil)
+      super
+    ensure
+      if kind == :commit || kind == :rollback
+        @transaction_changed_attributes = nil
       end
     end
-  end
-
-  if ActiveRecord.version >= Gem::Version.new('8.1.0.alpha')
-    def _run_commit_callbacks!
-      super
-    ensure
-      @transaction_changed_attributes = nil
-    end
-
-    def _run_rollback_callbacks!
-      super
-    ensure
-      @transaction_changed_attributes = nil
-    end
   else
-    def _run_commit_callbacks
+    def run_callbacks(kind)
       super
     ensure
-      @transaction_changed_attributes = nil
-    end
-
-    def _run_rollback_callbacks
-      super
-    ensure
-      @transaction_changed_attributes = nil
+      if kind == :commit || kind == :rollback
+        @transaction_changed_attributes = nil
+      end
     end
   end
 
