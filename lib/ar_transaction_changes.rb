@@ -12,6 +12,22 @@ module ArTransactionChanges
         @transaction_changed_attributes = nil
       end
     end
+
+    if ActiveRecord.version >= Gem::Version.new('8.1.0.alpha')
+      # We should reset @transaction_changed_attributes in the no-op version of the method.
+      # Even if there are no callbacks registered, attributes should be reset on commit/rollback.
+      def _run_commit_callbacks
+        super
+      ensure
+        @transaction_changed_attributes = nil
+      end
+
+      def _run_rollback_callbacks
+        super
+      ensure
+        @transaction_changed_attributes = nil
+      end
+    end
   else
     def run_callbacks(kind)
       super
