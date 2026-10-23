@@ -23,6 +23,43 @@ class TransactionChangesTest < Minitest::Test
     assert_equal ["Dylan", "Dillon"], @user.stored_transaction_changes["name"]
   end
 
+  def test_transaction_changes_for_aliased_attribute_writer
+    @user.job = "Tester"
+    @user.save!
+
+    assert_equal ["Developer", "Tester"], @user.stored_transaction_changes["occupation"]
+  end
+
+  def test_readonly_attribute_writer_still_raises_on_persisted_records
+    account = Account.create!(handle: "dylan", plan: "basic")
+    assert_equal({ "handle" => nil, "plan" => nil }, account.stored_transaction_changes.slice("handle", "plan"))
+
+    raises = if ActiveRecord.respond_to?(:_raise_on_assign_to_attr_readonly)
+      ActiveRecord._raise_on_assign_to_attr_readonly
+    elsif ActiveRecord.respond_to?(:raise_on_assign_to_attr_readonly)
+      ActiveRecord.raise_on_assign_to_attr_readonly
+    end
+    if raises
+      assert_raises(ActiveRecord::ReadonlyAttributeError) { account.handle = "dillon" }
+    end
+
+    account.plan = "pro"
+    account.save!
+    assert_equal({ "plan" => "basic" }, account.stored_transaction_changes)
+  ensure
+    Account.delete_all
+  end
+
+  def test_transaction_changes_when_included_through_a_concern
+    record = PlanChange.create!(handle: "dylan", plan: "basic")
+    record.plan = "pro"
+    record.save!
+
+    assert_equal({ "plan" => "basic" }, record.stored_transaction_changes)
+  ensure
+    PlanChange.delete_all
+  end
+
   def test_transaction_changes_for_updating_attribute
     @user[:name] = "Dillon"
     @user.save!
