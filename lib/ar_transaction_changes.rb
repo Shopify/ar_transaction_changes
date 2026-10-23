@@ -4,59 +4,6 @@ require "ar_transaction_changes/version"
 require "active_record"
 
 module ArTransactionChanges
-  def self.included(base)
-    super
-    base.singleton_class.prepend(GeneratedWriters) if GeneratedWriters.needed?
-  end
-
-  # Since rails/rails#59191, generated attribute writers (`name=`) call
-  # `@attributes.write_from_user` directly instead of `_write_attribute`, so the
-  # `_write_attribute` override below no longer sees them. Generate writers that
-  # record the change around that same direct write.
-  module GeneratedWriters # :nodoc:
-    # Rails versions with that change also dropped the `owner` argument from
-    # `AttrNames.define_attribute_accessor_method`, which the code below relies on.
-    def self.needed?
-      ActiveModel::AttributeMethods::AttrNames
-        .method(:define_attribute_accessor_method)
-        .parameters.none? { |_type, name| name == :owner }
-    end
-
-    def self.raise_on_assign_to_attr_readonly?
-      if ActiveRecord.respond_to?(:_raise_on_assign_to_attr_readonly)
-        ActiveRecord._raise_on_assign_to_attr_readonly
-      else
-        ActiveRecord.raise_on_assign_to_attr_readonly
-      end
-    end
-
-    private
-
-    def define_method_attribute=(canonical_name, owner:, as: canonical_name)
-      readonly = GeneratedWriters.raise_on_assign_to_attr_readonly? && readonly_attribute?(canonical_name)
-
-      ActiveModel::AttributeMethods::AttrNames.define_attribute_accessor_method(
-        canonical_name, writer: true,
-      ) do |temp_method_name, attr_name_expr|
-        namespace = readonly ? :ar_transaction_changes_readonly : :ar_transaction_changes
-        owner.define_cached_method(temp_method_name, as: "#{as}=", namespace: namespace) do |batch|
-          batch << "def #{temp_method_name}(value)"
-          if readonly
-            batch <<
-              "  unless new_record?" <<
-              "    raise ActiveRecord::ReadonlyAttributeError.new(#{attr_name_expr})" <<
-              "  end"
-          end
-          batch <<
-            "  _store_transaction_changed_attributes(#{attr_name_expr}) do" <<
-            "    @attributes.write_from_user(#{attr_name_expr}, value)" <<
-            "  end" <<
-            "end"
-        end
-      end
-    end
-  end
-
   if ActiveRecord.version >= Gem::Version.new('7.1')
     def run_callbacks(kind, type = nil)
       super

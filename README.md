@@ -30,10 +30,6 @@ Just include ArTransactionChanges and transaction_changed_attributes
 will store the original values for all the changed attributes
 throughout the transaction.
 
-Writes through generated attribute setters and `alias_attribute` setters
-are tracked, including on Rails versions that inline attribute writes.
-Rails' `attr_readonly` assignment rules still apply.
-
 ```ruby
 class User < ActiveRecord::Base
   include ArTransactionChanges
