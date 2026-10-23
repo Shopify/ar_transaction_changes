@@ -17,6 +17,8 @@ class User < ActiveRecord::Base
     serialize :notes, Array
   end
 
+  alias_attribute :job, :occupation
+
   attr_accessor :stored_transaction_changes
 
   after_commit :store_transaction_changes_for_tests
