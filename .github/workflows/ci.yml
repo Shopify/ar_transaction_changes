@@ -12,11 +12,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3', '3.4']
+        # Cover maintained Ruby branches, including security-only maintenance.
+        ruby: ['3.3', '3.4', '4.0']
         rails: ['7.0', '7.1', '7.2', '8.0']
         exclude:
           # Rails 7.0 requires Ruby < 3.4
           - ruby: '3.4'
+            rails: '7.0'
+          - ruby: '4.0'
             rails: '7.0'
 
     name: Ruby ${{ matrix.ruby }} / Rails ${{ matrix.rails }}
@@ -29,7 +32,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get -y install libsqlite3-dev
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -45,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3', '3.4']
+        ruby: ['3.3', '3.4', '4.0']
 
     name: Ruby ${{ matrix.ruby }} / Rails head
 
@@ -57,7 +60,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get -y install libsqlite3-dev
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
