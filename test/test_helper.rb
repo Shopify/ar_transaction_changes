@@ -25,6 +25,11 @@ ActiveRecord::Base.connection.tap do |db|
     t.text :notes
     t.timestamps null: false
   end
+
+  db.create_table(:accounts) do |t|
+    t.string :handle
+    t.string :plan
+  end
 end
 
 Dir[test_dir.join("models/*.rb")].each{ |file| require file }
