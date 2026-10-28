@@ -12,6 +12,7 @@ Gem::Specification.new do |gem|
   gem.summary       = %q{Store transaction changes for active record objects}
   gem.homepage      = "https://github.com/Shopify/ar_transaction_changes"
   gem.license       = "MIT"
+  gem.metadata["allowed_push_host"] = "https://rubygems.org"
 
   gem.required_ruby_version = ">= 3.2"
 

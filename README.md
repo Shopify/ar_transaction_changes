@@ -64,3 +64,8 @@ gem 'globalize', require: ['ar_transaction_changes', 'globalize']
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## Releasing
+
+Publishing is restricted to [RubyGems.org](https://rubygems.org) through the
+`allowed_push_host` gem metadata.
